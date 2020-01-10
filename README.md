@@ -14,5 +14,6 @@ ConverseJS chat implementation for the FreeGameDev.net website https://converse.
 - Search
 
 ## Todo
-- [ ] Custom login and logout page
+- [ ] Enable XEP-0156 usage
+- [ ] Custom login and logout page (logout-redirect plugin not working yet)
 - [ ] Audio/Video conferences with Jitsi Meet / Colibri videobridge? 
