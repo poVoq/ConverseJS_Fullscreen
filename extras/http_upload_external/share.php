@@ -23,10 +23,15 @@
 
     http_upload_external_base_url = "https://your.example.com/path/to/share.php/"
     http_upload_external_secret = "this is your secret string"
-    
+
   In Ejabberd set:
-  
-  
+
+	modules:
+	  mod_http_upload:
+	  put_url: "https://your.example.com/path/to/share.php/"
+	  external_secret: "this is your secret string"
+	  ## Limit upload size to 20mb
+	  max_size: 20971520
 
   ** License
 
