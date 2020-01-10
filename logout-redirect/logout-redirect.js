@@ -25,6 +25,8 @@
 
                console.log("login-redirect plugin has run");
             };
+
+        console.log("logout-redirect plugin is ready");
         };
     };
 
