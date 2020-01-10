@@ -1,0 +1,89 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>FGD Converse</title>
+    <link rel="shortcut icon" type="image/ico" href="favicon.ico"/>
+    <script src="3rdparty/libsignal-protocol.min.js"></script>
+    <link type="text/css" rel="stylesheet" media="screen" href="dist/converse.min.css" />
+    <script charset="utf-8" src="dist/converse.min.js"></script>
+    <script src="search/search.js"></script>
+    <link type="text/css" rel="stylesheet" media="screen" href="search/search.css" />
+    <script src="browsertab/favico.js"></script>
+    <script src="browsertab/browsertab.js"></script>
+    <script src="http-auth/http-auth.js"></script>
+    <script src="logout-redirect/logout-redirect.js"></script>
+    <style type="text/css">
+    #conversejs.theme-concord {
+    --heading-display: inherit;
+    --fullpage-chat-head-height: inherit;
+    --chatroom-head-button-color: #f3f3f3;
+    --fullpage-chatbox-button-size: 24px;
+    --occupants-features-display: inherit;
+    }
+    </style>
+</head>
+<body class="converse-fullscreen">
+<div id="conversejs-bg"></div>
+<noscript>
+   <h1 id="freegamedev-xmpp-chat">FreeGameDev.net XMPP web-chat</h1>
+   <p>Sorry, looks like the <a href="https://conversejs.org/">Converse.js</a>XMPP chat application we use here couldn’t be loaded. Maybe you disabled JavaScript, in which case we respect that, or maybe there a problem loading it.</p>
+   <p>Here are some other XMPP clients you could try, if you already have an XMPP account:</p>
+   <dl>
+   <dt>Desktop</dt>
+   <dd><ul>
+   <li><a href="https://gajim.org/">Gajim</a></li>
+   <li><a href="https://dino.im/">Dino</a></li>
+   <li><a href="https://swift.im/">Swift</a></li>
+   </ul>
+   </dd>
+   <dt>Mobile</dt>
+   <dd><ul>
+   <li><a href="https://github.com/siacs/Conversations">Conversations</a></li>
+   <li><a href="https://yaxim.org/">Yaxim</a></li>
+   <li><a href="https://monal.im/">Monal.im for iOS</a></li>
+   </ul>
+   </dd>
+   </dl>
+   <p><a href="https://xmpp.org/software/clients.html">More clients...</a></p>
+   <p>Or try joining us at #freegamer on Freenode IRC</p>
+</noscript>
+<script>
+if(typeof converse == 'undefined') {
+	var div = document.createElement("div");
+	var noscript = document.getElementsByTagName("noscript")[0];
+	div.innerHTML = noscript.innerText;
+	document.body.appendChild(div);
+} else {
+    converse.initialize({
+        websocket_url: 'wss://xmpp.freegamedev.net/ws/',
+        enable_smacks: true,
+        bosh_service_url: 'https://xmpp.freegamedev.net/bosh/',
+        authentication: 'login',
+        allow_registration: false,
+        default_domain: 'xmpp.freegamedev.net',
+        persistent_store: 'IndexedDB',
+        auto_away: 300,
+        auto_xa: 1800,
+        csi_waiting_time: 900,
+        auto_reconnect: true,
+        omemo_default: true,
+        allow_non_roster_messaging: true,
+        allow_chat_pending_contacts: true,
+        muc_show_join_leave: false,
+        message_archiving: 'always',
+        muc_domain: 'muc.xmpp.freegamedev.net',
+        auto_join_rooms: ["freegamer@muc.xmpp.freegamedev.net", "opengameart@muc.xmpp.freegamedev.net", "development@muc.xmpp.freegamedev.net", "offtopic@muc.xmpp.freegamedev.net"],
+        muc_instant_rooms: true,
+        view_mode: 'fullscreen',
+        whitelisted_plugins: ["search", "http-auth", "browsertab", "logout-redirect"],
+        logout_redirect_url: 'https://portal.freegamedev.net',
+        roster_groups: false,
+        show_client_info: false,
+        theme: 'concord'
+    });
+}
+</script>
+</body>
+</html>
