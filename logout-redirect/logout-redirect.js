@@ -102,7 +102,7 @@
              *
              *      _converse.api.waitUntil('operationCompleted', function { ... });
              */
-             _converse.api.listen.on('logout', function {
+             _converse.api.listen.on('logout', function () {
                  console.log("logout event caught by logout-redirect plugin");
                  alert(this._converse.user_settings.logout_redirect_url);
              });
