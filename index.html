@@ -51,13 +51,14 @@
    <p>Or try joining us at #freegamer on Freenode IRC</p>
 </noscript>
 <script>
-if(typeof converse == 'undefined') {
+    if(typeof converse == 'undefined') {
 	var div = document.createElement("div");
 	var noscript = document.getElementsByTagName("noscript")[0];
 	div.innerHTML = noscript.innerText;
 	document.body.appendChild(div);
-} else {
-    converse.initialize({
+    }
+
+    let config = {
         websocket_url: 'wss://xmpp.freegamedev.net/ws/',
         enable_smacks: true,
         bosh_service_url: 'https://xmpp.freegamedev.net/bosh/',
@@ -83,8 +84,28 @@ if(typeof converse == 'undefined') {
         roster_groups: false,
         show_client_info: false,
         theme: 'concord'
-    });
-}
+    };
+
+    if (window.converse_settings)
+    {
+        var localConfig = window.converse_settings.getConfig();
+
+        const keys = Object.getOwnPropertyNames(localConfig);
+
+        for (var i=0; i<keys.length; i++)
+        {
+            config[keys[i]] = localConfig[keys[i]];
+            console.debug("Use local saved setting", keys[i], localConfig[keys[i]]);
+        }
+
+        if (config.theme)
+        {
+            document.getElementById("conversejs").classList.add("theme-" + config.theme);
+        }
+    }
+	
+    converse.initialize(config);
+
 </script>
 </body>
 </html>
