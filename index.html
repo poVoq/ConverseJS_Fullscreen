@@ -86,24 +86,6 @@
         theme: 'concord'
     };
 
-    if (window.converse_settings)
-    {
-        var localConfig = window.converse_settings.getConfig();
-
-        const keys = Object.getOwnPropertyNames(localConfig);
-
-        for (var i=0; i<keys.length; i++)
-        {
-            config[keys[i]] = localConfig[keys[i]];
-            console.debug("Use local saved setting", keys[i], localConfig[keys[i]]);
-        }
-
-        if (config.theme)
-        {
-            document.getElementById("conversejs-bg").classList.add("theme-" + config.theme);
-        }
-    }
-
     converse.initialize(config);
 
 </script>
