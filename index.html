@@ -8,13 +8,14 @@
     <script src="3rdparty/libsignal-protocol.min.js"></script>
     <link type="text/css" rel="stylesheet" media="screen" href="dist/converse.min.css" />
     <script charset="utf-8" src="dist/converse.min.js"></script>
-    <script src="search/search.js"></script>
-    <link type="text/css" rel="stylesheet" media="screen" href="search/search.css" />
-    <script src="browsertab/favico.js"></script>
-    <script src="browsertab/browsertab.js"></script>
-    <script src="http-auth/http-auth.js"></script>
-    <script src="stickers/stickers.js"></script>
-    <script src="logout-redirect/logout-redirect.js"></script>
+    <link type="text/css" rel="stylesheet" media="screen" href="packages/search/search.css" />
+    <script src="packages/search/jspdf.debug.js"></script>
+    <script src="packages/search/jspdf.plugin.autotable.js"></script>
+    <script src="packages/search/search.js"></script>
+    <script src="packages/http-auth/http-auth.js"></script>
+    <script src="packages/toolbar-utilities/toolbar-utilities.js"></script>
+    <link type="text/css" rel="stylesheet" media="screen" href="packages/stickers/stickers.css" />
+    <script src="packages/stickers/stickers.js"></script>
 </head>
 <body class="converse-fullscreen">
 <div id="conversejs-bg"></div>
@@ -73,8 +74,7 @@
         auto_join_rooms: ["freegamer@muc.xmpp.freegamedev.net", "opengameart@muc.xmpp.freegamedev.net", "development@muc.xmpp.freegamedev.net", "offtopic@muc.xmpp.freegamedev.net", "libregamewiki@muc.xmpp.freegamedev.net"],
         muc_instant_rooms: true,
         view_mode: 'fullscreen',
-        whitelisted_plugins: ["search", "http-auth", "browsertab", "stickers", "logout-redirect"],
-        logout_redirect_url: 'https://portal.freegamedev.net',
+        whitelisted_plugins: ["search", "http-auth", "toolbar-utilities", "stickers"],
         roster_groups: false,
         show_client_info: false,
         emoji_categories: {
