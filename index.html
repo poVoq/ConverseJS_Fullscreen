@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>FGD Converse</title>
+    <title>ConverseJS Fullscreen</title>
     <link rel="shortcut icon" type="image/ico" href="favicon.ico"/>
     <script src="3rdparty/libsignal-protocol.min.js"></script>
     <link type="text/css" rel="stylesheet" media="screen" href="dist/converse.min.css" />
@@ -20,7 +20,7 @@
 <body class="converse-fullscreen">
 <div id="conversejs-bg"></div>
 <noscript>
-   <h1 id="freegamedev-xmpp-chat">FreeGameDev.net XMPP web-chat</h1>
+   <h1 id="xmpp-chat">XMPP web-chat</h1>
    <p>Sorry, looks like the <a href="https://conversejs.org/">Converse.js</a>XMPP chat application we use here couldn’t be loaded. Maybe you disabled JavaScript, in which case we respect that, or maybe there a problem loading it.</p>
    <p>Here are some other XMPP clients you could try, if you already have an XMPP account:</p>
    <dl>
@@ -51,13 +51,13 @@
     }
 
     let config = {
-        websocket_url: 'wss://xmpp.freegamedev.net/ws/',
+        websocket_url: 'wss://xmpp.example.com/ws/',
         enable_smacks: true,
-        bosh_service_url: 'https://xmpp.freegamedev.net/bosh/',
+        bosh_service_url: 'https://xmpp.example.com/bosh/',
         discover_connection_methods: false,
         authentication: 'login',
         allow_registration: false,
-        default_domain: 'xmpp.freegamedev.net',
+        default_domain: 'xmpp.example.com',
         persistent_store: 'localStorage',
         auto_away: 300,
         auto_xa: 1800,
@@ -70,8 +70,8 @@
         show_send_button: true,
         hide_muc_participants: false,
         message_archiving: 'always',
-        muc_domain: 'muc.xmpp.freegamedev.net',
-        auto_join_rooms: ["freegamer@muc.xmpp.freegamedev.net", "opengameart@muc.xmpp.freegamedev.net", "development@muc.xmpp.freegamedev.net", "offtopic@muc.xmpp.freegamedev.net", "libregamewiki@muc.xmpp.freegamedev.net"],
+        muc_domain: 'conference.xmpp.example.com',
+        auto_join_rooms: ["room1@conference.xmpp.example.com", "room2@conference.xmpp.example.com"],
         muc_instant_rooms: true,
         view_mode: 'fullscreen',
         whitelisted_plugins: ["search", "http-auth", "toolbar-utilities", "stickers"],
