@@ -1,5 +1,5 @@
-# FreeGameDevChat
-ConverseJS chat implementation for the FreeGameDev.net website https://converse.freegamedev.net
+# Fullscreen ConverseJS Chat
+ConverseJS stand-alone fullscreen chat implementation. Simply clone and slightly adapt the connection settings in index.html.
 
 ## Implementation details
 - Full screen chat with Concord theme based on ConverseJS 7.0.4
