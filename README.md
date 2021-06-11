@@ -9,7 +9,6 @@ ConverseJS stand-alone fullscreen chat implementation. Simply clone and slightly
 - Details on XEP-0156 implementation on ejabberd (but not enabled)
 
 ## Used community plugins
-- http-auth XEP-0070
 - Search
 - Stickers
 - Toolbar-utilities 
