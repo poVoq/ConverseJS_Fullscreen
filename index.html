@@ -9,12 +9,12 @@
     <link type="text/css" rel="stylesheet" media="screen" href="dist/converse.min.css" />
     <script charset="utf-8" src="dist/converse.min.js"></script>
     <link type="text/css" rel="stylesheet" media="screen" href="packages/search/search.css" />
-    <script src="packages/search/jspdf.debug.js"></script>
-    <script src="packages/search/jspdf.plugin.autotable.js"></script>
-    <script src="packages/search/search.js"></script>
-    <script src="packages/toolbar-utilities/toolbar-utilities.js"></script>
+    <script src="plugins/search/jspdf.debug.js"></script>
+    <script src="plugins/search/jspdf.plugin.autotable.js"></script>
+    <script src="plugins/search/search.js"></script>
+    <script src="plugins/toolbar-utilities/toolbar-utilities.js"></script>
     <link type="text/css" rel="stylesheet" media="screen" href="packages/stickers/stickers.css" />
-    <script src="packages/stickers/stickers.js"></script>
+    <script src="plugins/stickers/stickers.js"></script>
 </head>
 <body class="converse-fullscreen">
 <div id="conversejs-bg"></div>
@@ -53,11 +53,11 @@
         websocket_url: 'wss://xmpp.example.com/ws/',
         enable_smacks: true,
         bosh_service_url: 'https://xmpp.example.com/bosh/',
-        discover_connection_methods: false,
+        discover_connection_methods: true,
         authentication: 'login',
         allow_registration: false,
         default_domain: 'xmpp.example.com',
-        persistent_store: 'localStorage',
+        persistent_store: 'IndexedDB',
         auto_away: 300,
         auto_xa: 1800,
         csi_waiting_time: 900,
@@ -72,10 +72,11 @@
         muc_domain: 'conference.xmpp.example.com',
         auto_join_rooms: ["room1@conference.xmpp.example.com", "room2@conference.xmpp.example.com"],
         muc_instant_rooms: true,
+        muc_clear_messages_on_leave: true,
         view_mode: 'fullscreen',
         whitelisted_plugins: ["search", "toolbar-utilities", "stickers"],
         roster_groups: false,
-        show_client_info: false,
+        show_client_info: true,
         emoji_categories: {
           "smileys": ":grinning:",
           "people": ":thumbsup:",

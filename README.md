@@ -1,14 +1,14 @@
 # Fullscreen ConverseJS Chat
-ConverseJS stand-alone fullscreen chat implementation. Simply clone and slightly adapt the connection settings in index.html.
+ConverseJS stand-alone fullscreen chat implementation. Simply clone and slightly adapt the connection settings in index.html (replace all "example.com").
 
 ## Implementation details
-- Full screen chat with Concord theme based on ConverseJS 7.0.6
+- Full screen chat with Concord theme based on ConverseJS 8.0
 - No Javascript fall back message
 - Libsignal.js OMEMO End2End encryption (support enabled by default)
 
 ## Extras
 - Php scripts for http_upload_external with regular purge
-- Details on XEP-0156 implementation on ejabberd (but not enabled)
+- Details on XEP-0156 implementation for ejabberd
 
 ## Used community plugins
 - Search
@@ -16,5 +16,4 @@ ConverseJS stand-alone fullscreen chat implementation. Simply clone and slightly
 - Toolbar-utilities 
 
 ## Todo
-- [ ] Enable XEP-0156 usage
 - [ ] Audio/Video conferences with Jitsi Meet?
