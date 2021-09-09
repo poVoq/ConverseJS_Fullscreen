@@ -23166,7 +23166,7 @@ exports.ParseError = ParseError;
 
 /***/ }),
 
-/***/ 8639:
+/***/ 6387:
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -40682,7 +40682,7 @@ Object.assign(Model.prototype, Events, {
 });
 ;// CONCATENATED MODULE: ./src/headless/utils/core.js
 /**
- * @copyright 2020, the Converse.js contributors
+ * @copyright The Converse.js contributors
  * @license Mozilla Public License (MPLv2)
  * @description This is the core utilities module.
  */
@@ -40697,6 +40697,13 @@ Object.assign(Model.prototype, Events, {
 
 
 
+function isEmptyMessage(attrs) {
+  if (attrs instanceof Model) {
+    attrs = attrs.attributes;
+  }
+
+  return !attrs['oob_url'] && !attrs['file'] && !(attrs['is_encrypted'] && attrs['plaintext']) && !attrs['message'];
+}
 /**
  * The utils object
  * @namespace u
@@ -40801,46 +40808,11 @@ u.isNewMessage = function (message) {
 
 u.shouldCreateMessage = function (attrs) {
   return attrs['retracted'] || // Retraction received *before* the message
-  !u.isEmptyMessage(attrs);
+  !isEmptyMessage(attrs);
 };
 
 u.shouldCreateGroupchatMessage = function (attrs) {
   return attrs.nick && (u.shouldCreateMessage(attrs) || attrs.is_tombstone);
-};
-
-u.isEmptyMessage = function (attrs) {
-  if (attrs instanceof Model) {
-    attrs = attrs.attributes;
-  }
-
-  return !attrs['oob_url'] && !attrs['file'] && !(attrs['is_encrypted'] && attrs['plaintext']) && !attrs['message'];
-}; //TODO: Remove
-
-
-u.isOnlyChatStateNotification = function (msg) {
-  if (msg instanceof Element) {
-    // See XEP-0085 Chat State Notification
-    return msg.querySelector('body') === null && (msg.querySelector('active') !== null || msg.querySelector('composing') !== null || msg.querySelector('inactive') !== null || msg.querySelector('paused') !== null || msg.querySelector('gone') !== null);
-  }
-
-  if (msg instanceof Model) {
-    msg = msg.attributes;
-  }
-
-  return msg['chat_state'] && u.isEmptyMessage(msg);
-};
-
-u.isOnlyMessageDeliveryReceipt = function (msg) {
-  if (msg instanceof Element) {
-    // See XEP-0184 Message Delivery Receipts
-    return msg.querySelector('body') === null && msg.querySelector('received') !== null;
-  }
-
-  if (msg instanceof Model) {
-    msg = msg.attributes;
-  }
-
-  return msg['received'] && u.isEmptyMessage(msg);
 };
 
 u.isChatRoom = function (model) {
@@ -41293,7 +41265,9 @@ function decodeHTMLEntities(str) {
 
   return str;
 }
-/* harmony default export */ const utils_core = (u);
+/* harmony default export */ const utils_core = (Object.assign({
+  isEmptyMessage
+}, u));
 ;// CONCATENATED MODULE: ./src/headless/shared/settings.js
 
 
@@ -45479,7 +45453,7 @@ Strophe.addNamespace('VCARD', 'vcard-temp');
 Strophe.addNamespace('VCARDUPDATE', 'vcard-temp:x:update');
 Strophe.addNamespace('XFORM', 'jabber:x:data');
 Strophe.addNamespace('XHTML', 'http://www.w3.org/1999/xhtml');
-shared_converse.VERSION_NAME = "v8.0.0";
+shared_converse.VERSION_NAME = "v8.0.1";
 Object.assign(shared_converse, Events); // Make converse pluggable
 
 pluggable.enable(shared_converse, '_converse', 'pluggable');
@@ -46481,7 +46455,7 @@ function sendMarker(to_jid, id, type, msg_type) {
 
 function checkTLS(uri) {
   const uri_protocol = uri.protocol().toLowerCase();
-  return window.location.protocol === 'http:' || window.location.protocol === 'https:' && ['http', 'aesgcm'].includes(uri_protocol);
+  return window.location.protocol === 'http:' || window.location.protocol === 'https:' && ['https', 'aesgcm'].includes(uri_protocol);
 }
 
 function getURI(url) {
@@ -46904,13 +46878,19 @@ function getChatState(stanza) {
 function isValidReceiptRequest(stanza, attrs) {
   return attrs.sender !== 'me' && !attrs.is_carbon && !attrs.is_archived && sizzle_default()(`request[xmlns="${Strophe.NS.RECEIPTS}"]`, stanza).length;
 }
-function rejectUnencapsulatedForward(stanza) {
+/**
+ * Check whether the passed-in stanza is a forwarded message that is "bare",
+ * i.e. it's not forwarded as part of a larger protocol, like MAM.
+ * @param { XMLElement } stanza
+ */
+
+function throwErrorIfInvalidForward(stanza) {
   const bare_forward = sizzle_default()(`message > forwarded[xmlns="${Strophe.NS.FORWARD}"]`, stanza).length;
 
   if (bare_forward) {
     rejectMessage(stanza, 'Forwarded messages not part of an encapsulating protocol are not supported');
     const from_jid = stanza.getAttribute('from');
-    return new StanzaParseError(`Ignoring unencapsulated forwarded message from ${from_jid}`, stanza);
+    throw new StanzaParseError(`Ignoring unencapsulated forwarded message from ${from_jid}`, stanza);
   }
 }
 /**
@@ -47151,12 +47131,7 @@ const {
 async function parseMessage(stanza, _converse) {
   var _stanza$querySelector, _stanza$querySelector2, _contact, _contact$attributes, _stanza$querySelector3, _stanza$querySelector4;
 
-  const err = rejectUnencapsulatedForward(stanza);
-
-  if (err) {
-    return err;
-  }
-
+  throwErrorIfInvalidForward(stanza);
   let to_jid = stanza.getAttribute('to');
   const to_resource = parsers_Strophe.getResourceFromJid(to_jid);
 
@@ -49104,7 +49079,10 @@ async function handleErrorMessage(stanza) {
   }
 
   const chatbox = await api.chatboxes.get(from_jid);
-  chatbox === null || chatbox === void 0 ? void 0 : chatbox.handleErrorMessageStanza(stanza);
+
+  if (chatbox.get('type') === shared_converse.PRIVATE_CHAT_TYPE) {
+    chatbox === null || chatbox === void 0 ? void 0 : chatbox.handleErrorMessageStanza(stanza);
+  }
 }
 
 function autoJoinChats() {
@@ -50993,7 +50971,7 @@ function getMEPActivities(stanza) {
   const items_el = muc_parsers_sizzle(`items[node="${muc_parsers_Strophe.NS.CONFINFO}"]`, stanza).pop();
 
   if (!items_el) {
-    return [];
+    return null;
   }
 
   const from = stanza.getAttribute('from');
@@ -51086,14 +51064,9 @@ function getModerationAttributes(stanza) {
 
 
 async function parseMUCMessage(stanza, chatbox, _converse) {
-  var _stanza$querySelector, _stanza$querySelector2, _chatbox$occupants$fi, _stanza$querySelector3, _stanza$querySelector4;
+  var _stanza, _stanza$querySelector, _stanza$querySelector2, _chatbox$occupants$fi, _stanza$querySelector3, _stanza$querySelector4;
 
-  const err = rejectUnencapsulatedForward(stanza);
-
-  if (err) {
-    return err;
-  }
-
+  throwErrorIfInvalidForward(stanza);
   const selector = `[xmlns="${parsers_NS.MAM}"] > forwarded[xmlns="${parsers_NS.FORWARD}"] > message`;
   const original_stanza = stanza;
   stanza = muc_parsers_sizzle(selector, stanza).pop() || stanza;
@@ -51111,6 +51084,7 @@ async function parseMUCMessage(stanza, chatbox, _converse) {
    * @typedef { Object } MUCMessageAttributes
    * The object which {@link parseMUCMessage} returns
    * @property { ('me'|'them') } sender - Whether the message was sent by the current user or someone else
+   * @property { Array<Object> } activities - A list of objects representing XEP-0316 MEP notification data
    * @property { Array<Object> } references - A list of objects representing XEP-0372 references
    * @property { Boolean } editable - Is this message editable via XEP-0308?
    * @property { Boolean } is_archived -  Is this message from a XEP-0313 MAM archive?
@@ -51165,6 +51139,8 @@ async function parseMUCMessage(stanza, chatbox, _converse) {
   let attrs = Object.assign({
     from,
     nick,
+    'is_forwarded': !!((_stanza = stanza) !== null && _stanza !== void 0 && _stanza.querySelector('forwarded')),
+    'activities': getMEPActivities(stanza),
     'body': (_stanza$querySelector = stanza.querySelector('body')) === null || _stanza$querySelector === void 0 ? void 0 : (_stanza$querySelector2 = _stanza$querySelector.textContent) === null || _stanza$querySelector2 === void 0 ? void 0 : _stanza$querySelector2.trim(),
     'chat_state': getChatState(stanza),
     'from_muc': muc_parsers_Strophe.getBareJidFromJid(from),
@@ -52060,28 +52036,42 @@ const ChatRoomMixin = {
    * @param { XMLElement } stanza
    */
   async handleMessageStanza(stanza) {
-    if (stanza.getAttribute('type') !== 'groupchat') {
-      this.handleForwardedMentions(stanza);
-      return;
-    } else if (isArchived(stanza)) {
-      // MAM messages are handled in converse-mam.
-      // We shouldn't get MAM messages here because
-      // they shouldn't have a `type` attribute.
-      return headless_log.warn(`Received a MAM message with type "groupchat"`);
+    const type = stanza.getAttribute('type');
+
+    if (type === 'error') {
+      return this.handleErrorMessageStanza(stanza);
     }
 
-    this.createInfoMessages(stanza);
-    this.fetchFeaturesIfConfigurationChanged(stanza);
+    if (type === 'groupchat') {
+      if (isArchived(stanza)) {
+        // MAM messages are handled in converse-mam.
+        // We shouldn't get MAM messages here because
+        // they shouldn't have a `type` attribute.
+        return headless_log.warn(`Received a MAM message with type "groupchat"`);
+      }
+
+      this.createInfoMessages(stanza);
+      this.fetchFeaturesIfConfigurationChanged(stanza);
+    } else if (!type) {
+      return this.handleForwardedMentions(stanza);
+    }
     /**
      * @typedef { Object } MUCMessageData
-     * An object containing the original groupchat message stanza,
-     * as well as the parsed attributes.
-     * @property { XMLElement } stanza
+     * An object containing the parsed { @link MUCMessageAttributes } and
+     * current { @link ChatRoom }.
      * @property { MUCMessageAttributes } attrs
      * @property { ChatRoom } chatbox
      */
 
-    const attrs = await parseMUCMessage(stanza, this, shared_converse);
+
+    let attrs;
+
+    try {
+      attrs = await parseMUCMessage(stanza, this, shared_converse);
+    } catch (e) {
+      return headless_log.error(e.message);
+    }
+
     const data = {
       stanza,
       attrs,
@@ -53781,10 +53771,57 @@ const ChatRoomMixin = {
   },
 
   /**
+   * Given { @link MessageAttributes } look for XEP-0316 Room Notifications and create info
+   * messages for them.
+   * @param { XMLElement } stanza
+   */
+  handleMEPNotification(attrs) {
+    var _attrs$activities;
+
+    if (attrs.from !== this.get('jid') || !attrs.activities) {
+      return false;
+    }
+
+    (_attrs$activities = attrs.activities) === null || _attrs$activities === void 0 ? void 0 : _attrs$activities.forEach(activity_attrs => {
+      const data = Object.assign({
+        'msgid': attrs.msgid,
+        'from_muc': attrs.from
+      }, activity_attrs);
+      this.createMessage(data); // Trigger so that notifications are shown
+
+      api.trigger('message', {
+        'attrs': data,
+        'chatbox': this
+      });
+    });
+    return !!attrs.activities.length;
+  },
+
+  /**
+   * Returns an already cached message (if it exists) based on the
+   * passed in attributes map.
+   * @method _converse.ChatRoom#getDuplicateMessage
+   * @param { object } attrs - Attributes representing a received
+   *  message, as returned by { @link parseMUCMessage }
+   * @returns {Promise<_converse.Message>}
+   */
+  getDuplicateMessage(attrs) {
+    var _attrs$activities2;
+
+    if ((_attrs$activities2 = attrs.activities) !== null && _attrs$activities2 !== void 0 && _attrs$activities2.length) {
+      return this.messages.findWhere({
+        'type': 'info',
+        'msgid': attrs.msgid
+      });
+    } else {
+      return shared_converse.ChatBox.prototype.getDuplicateMessage.call(this, attrs);
+    }
+  },
+
+  /**
    * Handler for all MUC messages sent to this groupchat. This method
    * shouldn't be called directly, instead {@link _converse.ChatRoom#queueMessage}
    * should be called.
-   * @private
    * @method _converse.ChatRoom#onMessage
    * @param { MessageAttributes } attrs - A promise which resolves to the message attributes.
    */
@@ -53799,12 +53836,13 @@ const ChatRoomMixin = {
     const message = this.getDuplicateMessage(attrs);
 
     if (message) {
-      return this.updateMessage(message, attrs);
+      message.get('type') === 'groupchat' && this.updateMessage(message, attrs);
+      return;
     } else if (attrs.is_valid_receipt_request || attrs.is_marker || this.ignorableCSN(attrs)) {
       return;
     }
 
-    if (this.handleMetadataFastening(attrs) || (await this.handleRetraction(attrs)) || (await this.handleModeration(attrs)) || (await this.handleSubjectChange(attrs))) {
+    if (this.handleMetadataFastening(attrs) || this.handleMEPNotification(attrs) || (await this.handleRetraction(attrs)) || (await this.handleModeration(attrs)) || (await this.handleSubjectChange(attrs))) {
       attrs.nick && this.removeNotification(attrs.nick, ['composing', 'paused']);
       return;
     }
@@ -54710,7 +54748,6 @@ const ChatRoomOccupants = Collection.extend({
 
 
 
-
 const {
   Strophe: muc_utils_Strophe,
   sizzle: muc_utils_sizzle,
@@ -54888,62 +54925,6 @@ async function autoJoinRooms() {
    */
 
   api.trigger('roomsAutoJoined');
-}
-/**
- * Given a stanza, look for XEP-0316 Room Notifications and create info
- * messages for them.
- * @param { XMLElement } stanza
- */
-
-async function handleMEPNotification(stanza) {
-  const msgid = stanza.getAttribute('id');
-  const from = stanza.getAttribute('from');
-  const room = await api.rooms.get(from);
-
-  if (!room) {
-    headless_log.warn(`Received a MEP message for a non-existent room: ${from}`);
-    return;
-  }
-
-  if (room.messages.findWhere({
-    msgid
-  })) {
-    // We already handled this stanza before
-    return;
-  }
-
-  getMEPActivities(stanza, room).forEach(attrs => {
-    room.createMessage(attrs);
-    api.trigger('message', {
-      stanza,
-      attrs,
-      'chatbox': room
-    });
-  });
-}
-
-function checkIfMEP(message) {
-  try {
-    if (muc_utils_sizzle(`event[xmlns="${muc_utils_Strophe.NS.PUBSUB}#event"]`, message).length) {
-      handleMEPNotification(message);
-    }
-  } catch (e) {
-    headless_log.error(e.message);
-  }
-
-  return true;
-}
-
-function registerPEPPushHandler() {
-  // Add a handler for devices pushed from other connected clients
-  shared_converse.connection.addHandler(checkIfMEP, null, 'message', 'headline'); // XXX: This is a hack. Prosody's MUC MAM doesn't allow for quering
-  // non-groupchat messages. So even though they might be archived, they
-  // don't get returned on query. To bypass this, some MEP messages are sent
-  // with type="groupchat".
-  // https://hg.prosody.im/prosody-modules/rev/da9469e68dee
-
-
-  shared_converse.connection.addHandler(checkIfMEP, null, 'message', 'groupchat');
 }
 function onAddClientFeatures() {
   if (api.settings.get('allow_muc')) {
@@ -55249,8 +55230,6 @@ core_converse.plugins.add('converse-muc', {
     api.listen.on('beforeResourceBinding', onBeforeResourceBinding);
     api.listen.on('beforeTearDown', onBeforeTearDown);
     api.listen.on('chatBoxesFetched', autoJoinRooms);
-    api.listen.on('connected', registerPEPPushHandler);
-    api.listen.on('reconnected', registerPEPPushHandler);
     api.listen.on('disconnected', disconnectChatRooms);
     api.listen.on('statusInitialized', onStatusInitialized);
     api.listen.on('windowStateChanged', onWindowStateChanged);
@@ -59302,7 +59281,9 @@ function initSessionData() {
 }
 
 function resetSessionData() {
-  shared_converse.session && shared_converse.session.save({
+  var _converse$session;
+
+  (_converse$session = shared_converse.session) === null || _converse$session === void 0 ? void 0 : _converse$session.save({
     'smacks_enabled': false,
     'num_stanzas_handled': 0,
     'num_stanzas_handled_by_server': 0,
@@ -59430,6 +59411,8 @@ async function sendEnableStanza() {
 }
 const smacks_handlers = [];
 async function enableStreamManagement() {
+  var _converse$session2;
+
   if (!api.settings.get('enable_smacks')) {
     return;
   }
@@ -59448,7 +59431,7 @@ async function enableStreamManagement() {
   smacks_handlers.push(conn.addHandler(sendAck, smacks_utils_Strophe.NS.SM, 'r'));
   smacks_handlers.push(conn.addHandler(handleAck, smacks_utils_Strophe.NS.SM, 'a'));
 
-  if (shared_converse.session.get('smacks_stream_id')) {
+  if ((_converse$session2 = shared_converse.session) !== null && _converse$session2 !== void 0 && _converse$session2.get('smacks_stream_id')) {
     await sendResumeStanza();
   } else {
     resetSessionData();
@@ -60580,10 +60563,9 @@ class BookmarksView extends ElementView {
   }
 
   toggleBookmarksList(ev) {
-    if (ev && ev.preventDefault) {
-      ev.preventDefault();
-    }
+    var _ev$preventDefault;
 
+    ev === null || ev === void 0 ? void 0 : (_ev$preventDefault = ev.preventDefault) === null || _ev$preventDefault === void 0 ? void 0 : _ev$preventDefault.call(ev);
     const icon_el = ev.target.matches('.fa') ? ev.target : ev.target.querySelector('.fa');
 
     if (bookmarks_list_u.hasClass('fa-caret-down', icon_el)) {
@@ -61006,7 +60988,7 @@ function shouldShowChat(c) {
   const connection = shared_converse === null || shared_converse === void 0 ? void 0 : shared_converse.connection;
   const logged_out = !(connection !== null && connection !== void 0 && connection.connected) || !(connection !== null && connection !== void 0 && connection.authenticated) || (connection === null || connection === void 0 ? void 0 : connection.disconnecting);
   return T`
-        ${view_mode === 'overlayed' ? T`<converse-minimized-chats></converse-minimized-chats>` : ''}
+        ${!logged_out && view_mode === 'overlayed' ? T`<converse-minimized-chats></converse-minimized-chats>` : ''}
         ${repeat_c(chatboxes.filter(shouldShowChat), m => m.get('jid'), m => {
     if (m.get('type') === CONTROLBOX_TYPE) {
       return T`
@@ -71241,6 +71223,9 @@ class MinimizedChats extends CustomElement {
     this.listenTo(this.model, 'change:name', this.requestUpdate);
     this.listenTo(this.model, 'change:num_unread', this.requestUpdate);
     this.listenTo(this.model, 'remove', this.requestUpdate);
+    this.listenTo(shared_converse, 'connected', this.requestUpdate);
+    this.listenTo(shared_converse, 'reconnected', this.requestUpdate);
+    this.listenTo(shared_converse, 'disconnected', this.requestUpdate);
   }
 
   render() {
@@ -75194,9 +75179,9 @@ var favico_default = /*#__PURE__*/__webpack_require__.n(favico);
 
 
 
+
 const {
-  Strophe: notifications_utils_Strophe,
-  u: notifications_utils_u
+  Strophe: notifications_utils_Strophe
 } = core_converse.env;
 const supports_html5_notification = ('Notification' in window);
 core_converse.env.Favico = (favico_default());
@@ -75229,11 +75214,18 @@ function updateUnreadFavicon() {
     (_navigator$setAppBadg = (_navigator2 = navigator).setAppBadge) === null || _navigator$setAppBadg === void 0 ? void 0 : _navigator$setAppBadg.call(_navigator2, num_unread).catch(e => headless_log.error("Could set unread count in app badge - " + e));
   }
 }
+
+function isReferenced(references, muc_jid, nick) {
+  const check = r => [shared_converse.bare_jid, `${muc_jid}/${nick}`].includes(r.uri.replace(/^xmpp:/, ''));
+
+  return references.reduce((acc, r) => acc || check(r), false);
+}
 /**
  * Is this a group message for which we should notify the user?
  * @private
  * @param { MUCMessageAttributes } attrs
  */
+
 
 async function shouldNotifyOfGroupMessage(attrs) {
   if (!(attrs !== null && attrs !== void 0 && attrs.body) && !(attrs !== null && attrs !== void 0 && attrs.message)) {
@@ -75256,14 +75248,8 @@ async function shouldNotifyOfGroupMessage(attrs) {
     is_mentioned = new RegExp(`\\b${nick}\\b`).test(attrs.body);
   }
 
-  const references_me = r => {
-    const jid = r.uri.replace(/^xmpp:/, '');
-    return jid == shared_converse.bare_jid || jid === `${muc_jid}/${nick}`;
-  };
-
-  const is_referenced = attrs.references.reduce((acc, r) => acc || references_me(r), false);
   const is_not_mine = sender !== nick;
-  const should_notify_user = notify_all === true || Array.isArray(notify_all) && notify_all.includes(muc_jid) || is_referenced || is_mentioned;
+  const should_notify_user = notify_all === true || Array.isArray(notify_all) && notify_all.includes(muc_jid) || isReferenced(attrs.references, muc_jid, nick) || is_mentioned;
 
   if (is_not_mine && !!should_notify_user) {
     /**
@@ -75281,25 +75267,44 @@ async function shouldNotifyOfGroupMessage(attrs) {
 
   return false;
 }
+
+async function shouldNotifyOfInfoMessage(attrs) {
+  if (!attrs.from_muc) {
+    return false;
+  }
+
+  const room = await api.rooms.get(attrs.from_muc);
+
+  if (!room) {
+    return false;
+  }
+
+  const nick = room.get('nick');
+  const muc_jid = attrs.from_muc;
+  const notify_all = api.settings.get('notify_all_room_messages');
+  return notify_all === true || Array.isArray(notify_all) && notify_all.includes(muc_jid) || isReferenced(attrs.references, muc_jid, nick);
+}
 /**
  * @private
+ * @async
  * @method shouldNotifyOfMessage
  * @param { MessageData|MUCMessageData } data
  */
 
-async function shouldNotifyOfMessage(data) {
+
+function shouldNotifyOfMessage(data) {
   const {
-    attrs,
-    stanza
+    attrs
   } = data;
 
-  if (!attrs || stanza.querySelector('forwarded') !== null) {
+  if (!attrs || attrs.is_forwarded) {
     return false;
   }
 
   if (attrs['type'] === 'groupchat') {
-    const result = await shouldNotifyOfGroupMessage(attrs);
-    return result;
+    return shouldNotifyOfGroupMessage(attrs);
+  } else if (attrs['type'] === 'info') {
+    return shouldNotifyOfInfoMessage(attrs);
   } else if (attrs.is_headline) {
     // We want to show notifications for headline messages.
     return isMessageToHiddenChat(attrs);
@@ -75307,7 +75312,7 @@ async function shouldNotifyOfMessage(data) {
 
   const is_me = notifications_utils_Strophe.getBareJidFromJid(attrs.from) === shared_converse.bare_jid;
 
-  return !notifications_utils_u.isOnlyChatStateNotification(stanza) && !notifications_utils_u.isOnlyMessageDeliveryReceipt(stanza) && !is_me && (api.settings.get('show_desktop_notifications') === 'all' || isMessageToHiddenChat(attrs));
+  return !isEmptyMessage(attrs) && !is_me && (api.settings.get('show_desktop_notifications') === 'all' || isMessageToHiddenChat(attrs));
 }
 
 function showFeedbackNotification(data) {
@@ -75480,7 +75485,7 @@ async function handleMessageNotification(data) {
    * message has will be made.
    * @event _converse#messageNotification
    * @type { MessageData|MUCMessageData}
-   * @example _converse.api.listen.on('messageNotification', stanza => { ... });
+   * @example _converse.api.listen.on('messageNotification', data => { ... });
    */
 
 
@@ -77029,7 +77034,7 @@ function updateDevicesFromStanza(stanza) {
   }
 }
 
-function utils_registerPEPPushHandler() {
+function registerPEPPushHandler() {
   // Add a handler for devices pushed from other connected clients
   shared_converse.connection.addHandler(message => {
     try {
@@ -77176,14 +77181,16 @@ function getOMEMOToolbarButton(toolbar_el, buttons) {
 
   let title;
 
-  if (is_muc && model.get('omemo_supported')) {
+  if (model.get('omemo_supported')) {
     const i18n_plaintext = __('Messages are being sent in plaintext');
 
     const i18n_encrypted = __('Messages are sent encrypted');
 
     title = model.get('omemo_active') ? i18n_encrypted : i18n_plaintext;
-  } else {
+  } else if (is_muc) {
     title = __('This groupchat needs to be members-only and non-anonymous in ' + 'order to support OMEMO encrypted messages');
+  } else {
+    title = __('OMEMO encryption is not supported');
   }
 
   let color;
@@ -78315,7 +78322,7 @@ core_converse.plugins.add('converse-omemo', {
     api.listen.on('parseMUCMessage', parseEncryptedMessage);
     api.listen.on('chatBoxViewInitialized', onChatInitialized);
     api.listen.on('chatRoomViewInitialized', onChatInitialized);
-    api.listen.on('connected', utils_registerPEPPushHandler);
+    api.listen.on('connected', registerPEPPushHandler);
     api.listen.on('getToolbarButtons', getOMEMOToolbarButton);
     api.listen.on('statusInitialized', initOMEMO);
     api.listen.on('addClientFeatures', () => api.disco.own.features.add(`${omemo_Strophe.NS.OMEMO_DEVICELIST}+notify`));
@@ -79889,19 +79896,12 @@ const room_item = o => {
             </div>
         </div>`;
 });
-;// CONCATENATED MODULE: ./src/plugins/roomslist/view.js
-
-
-
-
-
-
+;// CONCATENATED MODULE: ./src/plugins/roomslist/model.js
 
 
 const {
-  Strophe: view_Strophe
+  Strophe: roomslist_model_Strophe
 } = core_converse.env;
-const view_u = core_converse.env.utils;
 const RoomsListModel = Model.extend({
   defaults: function () {
     return {
@@ -79913,15 +79913,29 @@ const RoomsListModel = Model.extend({
 
   setDomain(jid) {
     if (!api.settings.get('locked_muc_domain')) {
-      this.save('muc_domain', view_Strophe.getDomainFromJid(jid));
+      this.save('muc_domain', roomslist_model_Strophe.getDomainFromJid(jid));
     }
   }
 
 });
+/* harmony default export */ const roomslist_model = (RoomsListModel);
+;// CONCATENATED MODULE: ./src/plugins/roomslist/view.js
+
+
+
+
+
+
+
+
+const {
+  Strophe: view_Strophe,
+  u: view_u
+} = core_converse.env;
 class RoomsList extends ElementView {
   initialize() {
     const id = `converse.roomspanel${shared_converse.bare_jid}`;
-    this.model = new RoomsListModel({
+    this.model = new roomslist_model({
       id
     });
     initStorage(this.model, id);
@@ -80009,14 +80023,13 @@ class RoomsList extends ElementView {
   }
 
   toggleRoomsList(ev) {
-    if (ev && ev.preventDefault) {
-      ev.preventDefault();
-    }
+    var _ev$preventDefault;
 
+    ev === null || ev === void 0 ? void 0 : (_ev$preventDefault = ev.preventDefault) === null || _ev$preventDefault === void 0 ? void 0 : _ev$preventDefault.call(ev);
     const icon_el = ev.target.matches('.fa') ? ev.target : ev.target.querySelector('.fa');
 
     if (icon_el.classList.contains("fa-caret-down")) {
-      view_u.slideIn(this.el.querySelector('.open-rooms-list')).then(() => {
+      view_u.slideIn(this.querySelector('.open-rooms-list')).then(() => {
         this.model.save({
           'toggle-state': shared_converse.CLOSED
         });
@@ -80024,7 +80037,7 @@ class RoomsList extends ElementView {
         icon_el.classList.add("fa-caret-right");
       });
     } else {
-      view_u.slideOut(this.el.querySelector('.open-rooms-list')).then(() => {
+      view_u.slideOut(this.querySelector('.open-rooms-list')).then(() => {
         this.model.save({
           'toggle-state': shared_converse.OPENED
         });
@@ -83426,7 +83439,7 @@ const converse = {
       __webpack_require__.p = settings.assets_path; // eslint-disable-line no-undef
     }
 
-    __webpack_require__(8639);
+    __webpack_require__(6387);
 
     Object.keys(plugins).forEach(name => converse.plugins.add(name, plugins[name]));
     return converse;
