@@ -54,6 +54,7 @@
         enable_smacks: true,
         bosh_service_url: 'https://xmpp.example.com/bosh/',
         discover_connection_methods: true,
+        show_connection_url_input: true,
         authentication: 'login',
         allow_registration: false,
         default_domain: 'xmpp.example.com',
@@ -73,6 +74,7 @@
         auto_join_rooms: ["room1@conference.xmpp.example.com", "room2@conference.xmpp.example.com"],
         muc_instant_rooms: true,
         muc_clear_messages_on_leave: true,
+        render_media: true,
         view_mode: 'fullscreen',
         whitelisted_plugins: ["search", "toolbar-utilities", "stickers"],
         roster_groups: false,
@@ -101,7 +103,7 @@
           "flags": "Flags",
           "custom": "Stickers"
         },
-        theme: 'concord'
+        theme: 'dracula'
     };
 
     converse.initialize(config);
