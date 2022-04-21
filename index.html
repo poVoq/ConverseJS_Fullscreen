@@ -13,7 +13,8 @@
     <script src="plugins/search/jspdf.plugin.autotable.js"></script>
     <script src="plugins/search/search.js"></script>
     <script src="plugins/toolbar-utilities/toolbar-utilities.js"></script>
-    <script src="plugins/actions/actions.js"></script>
+    <script src="plugins/muc-directory/muc-directory.js"></script>
+    <link type="text/css" rel="stylesheet" media="screen" href="plugins/muc-directory/muc-directory.css" />
 </head>
 <body class="converse-fullscreen">
 <div id="conversejs-bg"></div>
@@ -75,7 +76,7 @@
         muc_clear_messages_on_leave: true,
         render_media: true,
         view_mode: 'fullscreen',
-        whitelisted_plugins: ["actions", "search", "toolbar-utilities"],
+        whitelisted_plugins: ["search", "toolbar-utilities", "muc-directory"],
         roster_groups: false,
         show_client_info: true,
         theme: 'default'
