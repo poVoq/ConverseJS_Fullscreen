@@ -8,7 +8,7 @@
     var Strophe, $iq, _converse, html, __, Model, BootstrapModal;
     var MUCDirectoryDialog = null;
     var mucDirectoryDialog = null;
-    var mucJids = {}, nextItem = 0, nickColors = {}, roomJids = [];
+    var mucJids = {}, nextItem = 0, nickColors = {}, roomJids = [], timestamp = (new Date()).toISOString();
 
     converse.plugins.add("muc-directory", {
         'dependencies': [],
@@ -65,7 +65,7 @@
 
                     console.debug("loadMore", roomJids.length, nextItem);
 
-                    if (nextItem < roomJids.length) for (let i = 0; i < 12; i++)
+                    if (nextItem < roomJids.length) for (let i = 0; i < 16; i++)
                     {
                         if (nextItem < roomJids.length)
                         {
@@ -109,7 +109,8 @@
 						
                         roomJids = Object.getOwnPropertyNames(mucJids);
 						
-						if (roomJids.length == 0) {
+						if (roomJids.length == 0 || converse.env.dayjs().isAfter(timestamp, 'hour')) {
+							timestamp = (new Date()).toISOString();
 							await fetchMUCs();
 							roomJids = Object.getOwnPropertyNames(mucJids);
 						}
@@ -142,7 +143,13 @@
             {
                 console.debug("chatBoxViewInitialized", view);
 				extendUI();					
-			});			
+			});	
+
+			_converse.api.listen.on('chatBoxClosed', function (chatbox)
+			{
+				console.debug("chatBoxClosed", chatbox);
+				extendUI();	
+			});				
 
             console.debug("muc directory plugin is ready");
         }

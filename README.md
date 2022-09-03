@@ -2,17 +2,19 @@
 [ConverseJS](https://github.com/conversejs/converse.js) stand-alone fullscreen chat implementation. Simply clone and slightly adapt the connection settings in index.html (replace all "example.com").
 
 ## Implementation details
-- Full-screen chat with Concord theme based on ConverseJS 9.1.0
+- Full-screen chat based on ConverseJS 9.1.1
 - Fallback message if browser does not support Javascript
 - Libsignal.js OMEMO End2End encryption (support enabled by default)
 - Optional websocket/bosh connection URL input field (if XEP-0156 fails)
 
 ## Extras
-- Php scripts for http_upload_external with regular purge
-- Details on XEP-0156 implementation for ejabberd
+- Php scripts for http_upload_external with regular purge (might be broken)
+- Details on XEP-0156 implementation for ejabberd (untested)
 
 ## Used community plugins
-- Actions
+- Directory
+- Http-auth
+- Muc-directory
 - Search
 - Toolbar-utilities 
 

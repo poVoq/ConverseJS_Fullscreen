@@ -12,6 +12,8 @@
     <script src="plugins/search/jspdf.debug.js"></script>
     <script src="plugins/search/jspdf.plugin.autotable.js"></script>
     <script src="plugins/search/search.js"></script>
+    <script src="plugins/http-auth/http-auth.js"></script>
+    <script src="plugins/directory/directory.js"></script>
     <script src="plugins/toolbar-utilities/toolbar-utilities.js"></script>
     <script src="plugins/muc-directory/muc-directory.js"></script>
     <link type="text/css" rel="stylesheet" media="screen" href="plugins/muc-directory/muc-directory.css" />
@@ -70,13 +72,11 @@
         show_send_button: true,
         hide_muc_participants: false,
         message_archiving: 'always',
-        muc_domain: 'conference.xmpp.example.com',
-        auto_join_rooms: ["room1@conference.xmpp.example.com", "room2@conference.xmpp.example.com"],
         muc_instant_rooms: true,
         muc_clear_messages_on_leave: true,
         render_media: true,
         view_mode: 'fullscreen',
-        whitelisted_plugins: ["search", "toolbar-utilities", "muc-directory"],
+        whitelisted_plugins: ["directory", "http-auth", "search", "toolbar-utilities", "muc-directory"],
         roster_groups: false,
         show_client_info: true,
         theme: 'default'
