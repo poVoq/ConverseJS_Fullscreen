@@ -1,3 +1,5 @@
+Development moved here: https://f-hub.org/infra/ConverseJS_Fullscreen
+
 # Fullscreen ConverseJS Chat
 [ConverseJS](https://github.com/conversejs/converse.js) stand-alone fullscreen chat implementation. Simply clone and slightly adapt the connection settings in index.html (replace all "example.com").
 
